@@ -8,6 +8,13 @@
       "when": 1752019499166,
       "tag": "0000_minor_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752096138909,
+      "tag": "0001_magenta_jack_murdock",
+      "breakpoints": true
     }
   ]
 }

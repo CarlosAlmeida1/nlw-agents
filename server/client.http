@@ -1,9 +1,42 @@
 @baseUrl = http://localhost:3000
 
+@roomId = {{createRoom.response.body.roomId}}
+
 # Get rooms
+# @name getRooms
 GET {{baseUrl}}/rooms
 
 ###
 
 # Health check
+# @name healthCheck
 GET {{baseUrl}}/health
+
+###
+
+# Create room
+# @name createRoom
+POST {{baseUrl}}/rooms
+Content-Type: application/json
+
+{
+  "name": "Room 1",
+  "description": "Description 1"
+}
+
+###
+
+# Get room questions
+# @name getRoomQuestions
+GET {{baseUrl}}/rooms/{{roomId}}/questions
+
+###
+
+# Create question
+# @name createQuestion
+POST {{baseUrl}}/rooms/{{roomId}}/questions
+Content-Type: applicatio2n/json
+
+{
+  "question": "Question 1"
+}
