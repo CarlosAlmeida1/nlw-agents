@@ -14,7 +14,7 @@ import { createQuestionRoute } from "./http/routes/create-question.ts";
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
 app.register(fastifyCors, {
-  origin: "http://localhost:5174",
+  origin: env.FRONTEND_URL,
 });
 
 app.setSerializerCompiler(serializerCompiler);
