@@ -7,7 +7,7 @@ export function useCreateQuestion(roomId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: CreateQuestionRequest) => {
+    mutationFn: async ({ question }: CreateQuestionRequest) => {
       const response = await fetch(
         `http://localhost:3000/rooms/${roomId}/questions`,
         {
@@ -15,7 +15,9 @@ export function useCreateQuestion(roomId: string) {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            question,
+          }),
         }
       )
 
@@ -24,10 +26,9 @@ export function useCreateQuestion(roomId: string) {
       return result
     },
 
-    // Executa no momento que for feita a chamada p/ API
     onMutate({ question }) {
       const questions = queryClient.getQueryData<GetRoomQuestionsResponse>([
-        'get-questions',
+        'get-room-questions',
         roomId,
       ])
 
@@ -42,7 +43,7 @@ export function useCreateQuestion(roomId: string) {
       }
 
       queryClient.setQueryData<GetRoomQuestionsResponse>(
-        ['get-questions', roomId],
+        ['get-room-questions', roomId],
         [newQuestion, ...questionsArray]
       )
 
@@ -51,7 +52,7 @@ export function useCreateQuestion(roomId: string) {
 
     onSuccess(data, _variables, context) {
       queryClient.setQueryData<GetRoomQuestionsResponse>(
-        ['get-questions', roomId],
+        ['get-room-questions', roomId],
         (questions) => {
           if (!questions) {
             return questions
@@ -75,19 +76,20 @@ export function useCreateQuestion(roomId: string) {
           })
         }
       )
+
+      // Invalidate queries para atualizar a lista
+      queryClient.invalidateQueries({
+        queryKey: ['get-room-questions', roomId],
+      })
     },
 
     onError(_error, _variables, context) {
       if (context?.questions) {
         queryClient.setQueryData<GetRoomQuestionsResponse>(
-          ['get-questions', roomId],
+          ['get-room-questions', roomId],
           context.questions
         )
       }
     },
-
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries({ queryKey: ['get-questions', roomId] })
-    // },
   })
 }

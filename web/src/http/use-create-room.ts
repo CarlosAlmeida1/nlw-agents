@@ -6,13 +6,16 @@ export function useCreateRoom() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: CreateRoomRequest) => {
+    mutationFn: async ({ description, name }: CreateRoomRequest) => {
       const response = await fetch('http://localhost:3000/rooms', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          name,
+          description,
+        }),
       })
 
       const result: CreateRoomResponse = await response.json()

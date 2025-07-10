@@ -5,5 +5,9 @@
     "formatter": {
       "semicolons": "asNeeded"
     }
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["src/**/*.{ts,tsx,js,jsx}"]
   }
 }
