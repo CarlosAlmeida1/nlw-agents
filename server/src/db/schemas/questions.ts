@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { rooms } from './rooms.ts';
+import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { rooms } from './rooms.ts'
 
 export const questions = pgTable('questions', {
   id: uuid().primaryKey().defaultRandom(),
@@ -8,5 +8,5 @@ export const questions = pgTable('questions', {
     .notNull(),
   question: text().notNull(),
   answer: text(),
-  createdAt: timestamp().notNull().defaultNow(),
-});
+  createdAt: timestamp().defaultNow().notNull(),
+})

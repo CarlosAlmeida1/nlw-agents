@@ -15,6 +15,13 @@
       "when": 1752096138909,
       "tag": "0001_magenta_jack_murdock",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752189431997,
+      "tag": "0002_young_talisman",
+      "breakpoints": true
     }
   ]
 }

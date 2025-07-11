@@ -1,9 +1,13 @@
-import { reset, seed } from 'drizzle-seed';
-import { db, sql } from './connection.ts';
-import { schema } from './schemas/index.ts';
+import { reset, seed } from 'drizzle-seed'
+import { db, sql } from './connection.ts'
+import { schema } from './schemas/index.ts'
 
-await reset(db, schema);
-await seed(db, schema).refine((f) => {
+// Removemos audio_chunks do schema para o seed, pois contém colunas vector não suportadas
+const { audioChunks, ...seedSchema } = schema
+
+await reset(db, seedSchema)
+
+await seed(db, seedSchema).refine((f) => {
   return {
     rooms: {
       count: 5,
@@ -13,12 +17,12 @@ await seed(db, schema).refine((f) => {
       },
     },
     questions: {
-      count: 15,
+      count: 20,
     },
-  };
-});
+  }
+})
 
-await sql.end();
+await sql.end()
 
-// biome-ignore lint/suspicious/noConsole: script de seed precisa mostrar confirmação
-console.log('Database seeded successfully');
+// biome-ignore lint/suspicious/noConsole: only used in dev
+console.log('Database seeded')
