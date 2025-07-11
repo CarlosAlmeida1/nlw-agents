@@ -21,6 +21,24 @@ Frontend em **React 19** + **TypeScript** com interface moderna que oferece:
 - ⚡ **Interface responsiva** com loading states e feedback visual
 - 🎨 **Design system** consistente com componentes reutilizáveis
 
+## 🖼️ Screenshots da Aplicação
+
+<div align="center">
+
+### Tela Principal
+![Tela Principal](../images/tela-principal.png)
+*Interface inicial com criação de salas e listagem de salas existentes*
+
+### Sistema de Perguntas
+![Perguntas](../images/perguntas.png)
+*Interface para fazer perguntas com formulário intuitivo*
+
+### Respostas da IA
+![Respostas](../images/respostas.png)
+*Respostas contextualizadas geradas pela IA baseadas no conteúdo gravado*
+
+</div>
+
 ## 🏗️ Arquitetura
 
 ### Stack Principal

@@ -13,6 +13,16 @@
 
 </div>
 
+## 🖼️ Preview da Aplicação
+
+<div align="center">
+
+![Tela Principal](./images/tela-principal.png)
+
+*Interface principal da aplicação mostrando criação de salas e lista de salas existentes*
+
+</div>
+
 ## 📋 Sobre o Projeto
 
 O **NLW Agents** é uma aplicação full-stack moderna que permite criar salas virtuais onde usuários podem:
@@ -92,6 +102,11 @@ Acesse `http://localhost:5173` para ver a aplicação em funcionamento!
 
 ```
 nlw-agents/
+├── 📁 images/                 # Screenshots da aplicação
+│   ├── 📄 tela-principal.png  # Tela inicial
+│   ├── 📄 perguntas.png       # Sistema de perguntas
+│   └── 📄 respostas.png       # Respostas da IA
+│
 ├── 📁 server/                 # Backend API
 │   ├── 📁 src/
 │   │   ├── 📁 db/            # Configuração do banco
