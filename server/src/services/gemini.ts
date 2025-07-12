@@ -10,20 +10,17 @@ const gemini = new GoogleGenAI({
 
 const model = 'gemini-2.5-flash'
 
-// Cache para embeddings
 const embeddingsCache = new Map<string, number[]>()
 
-// Configuração de retry com backoff
 const MAX_RETRIES = 3
-const INITIAL_DELAY = 1000 // 1 segundo
+const INITIAL_DELAY = 1000
 const BACKOFF_FACTOR = 2
 
-// Sistema de fila para rate limiting
 class ApiQueue {
   private queue: (() => Promise<void>)[] = []
   private processing = false
   private lastCallTime = 0
-  private minInterval = 500 // 500ms entre chamadas (aprox 120/min)
+  private minInterval = 500
 
   async add<T>(operation: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -35,7 +32,6 @@ class ApiQueue {
           reject(error)
         }
       })
-      
       if (!this.processing) {
         this.process()
       }
@@ -48,20 +44,16 @@ class ApiQueue {
 
     while (this.queue.length > 0) {
       const operation = this.queue.shift()!
-      
-      // Garantir intervalo mínimo entre chamadas
       const now = Date.now()
       const timeSinceLastCall = now - this.lastCallTime
       if (timeSinceLastCall < this.minInterval) {
         await sleep(this.minInterval - timeSinceLastCall)
       }
-      
       try {
         await operation()
       } catch (error) {
         console.error('Erro na fila de processamento:', error)
       }
-      
       this.lastCallTime = Date.now()
     }
 
@@ -71,47 +63,39 @@ class ApiQueue {
 
 const apiQueue = new ApiQueue()
 
-// Função auxiliar para sleep
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// Função para retry com backoff exponencial
 async function retryWithBackoff<T>(
   operation: () => Promise<T>,
   maxRetries: number = MAX_RETRIES,
   initialDelay: number = INITIAL_DELAY
 ): Promise<T> {
   let lastError: Error | null = null
-  
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await operation()
     } catch (error) {
       lastError = error as Error
-      
-      // Se é um erro de rate limit e não é a última tentativa
-      if (error instanceof Error && 
-          error.message.includes('429') && 
-          attempt < maxRetries) {
+      if (error instanceof Error &&
+        error.message.includes('429') &&
+        attempt < maxRetries) {
         const delay = initialDelay * Math.pow(BACKOFF_FACTOR, attempt)
         console.log(`Rate limit atingido. Tentativa ${attempt + 1}/${maxRetries + 1}. Aguardando ${delay}ms...`)
         await sleep(delay)
         continue
       }
-      
-      // Se não é um erro de rate limit, não faz retry
       if (!(error instanceof Error) || !error.message.includes('429')) {
         throw error
       }
-      
-      // Se é a última tentativa, lança o erro
       if (attempt === maxRetries) {
         throw error
       }
     }
   }
-  
+
   throw lastError
 }
 
@@ -154,7 +138,6 @@ Transcreva o áudio a seguir:
 }
 
 export async function generateEmbeddings(text: string) {
-  // Verificar se já existe no cache
   const cacheKey = text.trim().toLowerCase()
   if (embeddingsCache.has(cacheKey)) {
     console.log('Usando embedding do cache')
@@ -179,7 +162,7 @@ export async function generateEmbeddings(text: string) {
 
   const embeddings = response.embeddings[0].values
   embeddingsCache.set(cacheKey, embeddings)
-  
+
   return embeddings
 }
 
@@ -187,27 +170,23 @@ export async function generateAnswer(
   question: string,
   transcriptions: string[]
 ) {
-  // Se não houver transcrições relevantes, a IA deve responder com base no seu conhecimento geral sobre o contexto da pergunta.
   let context = transcriptions.join('\n\n')
   let prompt = ''
 
   if (transcriptions.length === 0) {
     prompt = `
-Você é um assistente especializado em responder perguntas sobre conteúdos de aulas, em português do Brasil. Não há transcrições disponíveis do conteúdo da aula para esta pergunta. Responda com base no seu conhecimento geral sobre o tema da pergunta, deixando claro que está utilizando seu conhecimento próprio e não informações específicas da aula. Seja claro, objetivo e cordial. Estruture a resposta em parágrafos curtos para facilitar a leitura.
-
-PERGUNTA:
-${question}
+Não há transcrições disponíveis do conteúdo da aula para esta pergunta. Não é possível responder sem informações do conteúdo da aula.
     `.trim()
   } else {
     prompt = `
-Você é um assistente especializado em responder perguntas com base em conteúdos de aulas transcritas em português do Brasil. Siga rigorosamente as instruções abaixo para fornecer respostas de alta qualidade:
+Você é um assistente especializado em responder perguntas com base exclusivamente nas transcrições de aulas fornecidas em português do Brasil. Siga rigorosamente as instruções abaixo:
 
-- Utilize exclusivamente as informações presentes no CONTEXTO fornecido.
-- Caso a resposta não esteja presente no contexto, responda com base no seu conhecimento geral sobre o tema, deixando claro que está utilizando seu conhecimento próprio e não informações específicas da aula.
+- Utilize apenas as informações presentes no CONTEXTO fornecido.
+- Se a resposta não estiver presente no contexto, responda: "Não há informações suficientes nas transcrições para responder a esta pergunta."
 - Seja claro, objetivo e direto ao ponto.
 - Mantenha um tom educativo, profissional e cordial.
 - Sempre que possível, cite trechos relevantes do contexto utilizando a expressão "conteúdo da aula", por exemplo: "Segundo o conteúdo da aula, ...".
-- Não invente, extrapole ou suponha informações que não estejam explicitamente no contexto, a menos que seja necessário para complementar a resposta com seu conhecimento geral.
+- Não invente, extrapole ou suponha informações que não estejam explicitamente no contexto.
 - Estruture a resposta em parágrafos curtos para facilitar a leitura.
 
 CONTEXTO:
@@ -244,7 +223,7 @@ export async function findRelevantTranscriptions(
   limit: number = 10
 ): Promise<string[]> {
   const questionEmbeddings = await generateEmbeddings(question)
-  
+
   const relevantChunks = await db
     .select({
       transcription: schema.audioChunks.transcription,
@@ -254,11 +233,10 @@ export async function findRelevantTranscriptions(
     .where(eq(schema.audioChunks.roomId, roomId))
     .orderBy(desc(cosineDistance(schema.audioChunks.embeddings, questionEmbeddings)))
     .limit(limit)
-  
+
   const relevantTranscriptions = relevantChunks
     .filter(chunk => (chunk.similarity as number) > 0.2)
     .map(chunk => chunk.transcription)
-  
-  // Agora sempre retorna o array (pode ser vazio)
+
   return relevantTranscriptions
 }

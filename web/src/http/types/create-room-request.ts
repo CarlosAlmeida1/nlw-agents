@@ -1,4 +1,5 @@
 export type CreateRoomRequest = {
   name: string
-  description: string
+  description?: string
+  isPublic?: boolean
 }

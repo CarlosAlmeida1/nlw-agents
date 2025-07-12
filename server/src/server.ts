@@ -13,6 +13,8 @@ import { getRoomQuestions } from './http/routes/get-room-questions.ts'
 import { getRoomsRoute } from './http/routes/get-rooms.ts'
 import { recordingControlRoute } from './http/routes/recording-control.ts'
 import { uploadAudioRoute } from './http/routes/upload-audio.ts'
+import { uploadFileRoute } from './http/routes/upload-file.ts'
+import { exportRoomRoute } from './http/routes/export-room.ts'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -20,20 +22,28 @@ app.register(fastifyCors, {
   origin: 'http://localhost:5173',
 })
 
-app.register(fastifyMultipart)
-
-app.setSerializerCompiler(serializerCompiler)
-app.setValidatorCompiler(validatorCompiler)
-
-app.get('/health', () => {
-  return 'OK'
+app.register(fastifyMultipart, {
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+  },
 })
 
-app.register(getRoomsRoute)
+app.setValidatorCompiler(validatorCompiler)
+app.setSerializerCompiler(serializerCompiler)
+
 app.register(createRoomRoute)
-app.register(getRoomQuestions)
+app.register(getRoomsRoute)
 app.register(createQuestionRoute)
+app.register(getRoomQuestions)
 app.register(recordingControlRoute)
 app.register(uploadAudioRoute)
+app.register(uploadFileRoute)
+app.register(exportRoomRoute)
 
-app.listen({ port: env.PORT })
+app.listen({ port: env.PORT, host: '0.0.0.0' }, (err, address) => {
+  if (err) {
+    console.error(err)
+    process.exit(1)
+  }
+  console.log(`Server listening at ${address}`)
+})

@@ -1,8 +1,10 @@
 import { ArrowLeft, Radio } from 'lucide-react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import { QuestionForm } from '@/components/question-form'
 import { QuestionList } from '@/components/question-list'
-import { Button } from '@/components/ui/button'
+import { FileUpload } from '@/components/file-upload'
+import { ExportButtons } from '@/components/export-buttons'
 
 type RoomParams = {
   roomId: string
@@ -17,7 +19,7 @@ export function Room() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-900">
-      <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
         <div className="mb-8">
           <div className="mb-4 flex items-center justify-between">
             <Link to="/">
@@ -37,15 +39,23 @@ export function Room() {
             Sala de Perguntas
           </h1>
           <p className="text-muted-foreground">
-            Faça perguntas e receba respostas com IA
+            Faça perguntas, envie arquivos e exporte o conteúdo
           </p>
         </div>
 
-        <div className="mb-8">
-          <QuestionForm roomId={params.roomId} />
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="mb-8">
+              <QuestionForm roomId={params.roomId} />
+            </div>
+            <QuestionList roomId={params.roomId} />
+          </div>
+          
+          <div className="space-y-8">
+            <FileUpload roomId={params.roomId} />
+            <ExportButtons roomId={params.roomId} />
+          </div>
         </div>
-
-        <QuestionList roomId={params.roomId} />
       </div>
     </div>
   )

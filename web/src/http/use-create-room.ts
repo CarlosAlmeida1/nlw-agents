@@ -6,7 +6,7 @@ export function useCreateRoom() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ description, name }: CreateRoomRequest) => {
+    mutationFn: async ({ name, description, isPublic }: CreateRoomRequest) => {
       const response = await fetch('http://localhost:3000/rooms', {
         method: 'POST',
         headers: {
@@ -15,6 +15,7 @@ export function useCreateRoom() {
         body: JSON.stringify({
           name,
           description,
+          isPublic,
         }),
       })
 
@@ -24,7 +25,9 @@ export function useCreateRoom() {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['get-rooms'] })
+      queryClient.invalidateQueries({
+        queryKey: ['get-rooms'],
+      })
     },
   })
 }
